@@ -1,0 +1,17 @@
+image: alpine
+stages:
+- deploy
+.ansible-config-base:
+  image: alpine
+  stage: unknown
+  before_script:
+  - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+  - apk add --no-cache openssh-client unzip ansible tar
+  - "which jq || (apk add --no-cache jq)"
+  - "which ssh-agent || ( apk add --no-cache openssh-client )"
+  - ansible-config dump --only-changed
+node_exporter_deploy:
+  extends: .ansible-config-base
+  stage: deploy
+  script:
+  - ansible --private-key $TARGET_SSH_PRIVATE_KEY -i $TARGET_HOST   
